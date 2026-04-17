@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot - Farmer AI Advisory System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-leaf me-2"></i>Farmer AI</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/chatbot">AI Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pest_detection">Pest Detection</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container">
+            <h2><i class="fas fa-robot me-2"></i>AI Farming Assistant</h2>
+            <p>Click on queries below or type your question in your language</p>
+        </div>
+    </div>
+
+    <section class="main-content">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="chat-container">
+                        <div class="chat-header">
+                            <h5 class="mb-2"><i class="fas fa-comments me-2"></i>Chat with AI Assistant</h5>
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div class="voice-toggle">
+                                    <label class="switch">
+                                        <input type="checkbox" id="autoSpeak" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <small class="ms-2">Auto Speak</small>
+                                </div>
+                                <div class="voice-indicators">
+                                    <span id="speakingIndicator" class="speaking-badge" style="display:none;">
+                                        <i class="fas fa-volume-up me-1"></i>Speaking...
+                                    </span>
+                                    <button class="btn btn-sm btn-outline-light" onclick="stopSpeaking()" title="Stop Speaking">
+                                        <i class="fas fa-stop"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="language-selector p-3 bg-light">
+                            <span class="me-2 fw-bold">Language / భాష / மொழி:</span>
+                            <button class="lang-btn active" data-lang="en">English</button>
+                            <button class="lang-btn" data-lang="hi">हिंदी</button>
+                            <button class="lang-btn" data-lang="te">తెలుగు</button>
+                            <button class="lang-btn" data-lang="ta">தமிழ்</button>
+                            <button class="lang-btn" data-lang="kn">ಕನ್ನಡ</button>
+                        </div>
+                        
+                        <div class="quick-queries p-3 bg-white border-bottom">
+                            <h6 class="mb-2"><i class="fas fa-bolt me-2"></i>Click to Ask (Select Language Above):</h6>
+                            <div class="query-buttons" id="queryButtons"></div>
+                        </div>
+                        
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message bot">
+                                <div class="message-content">
+                                    <strong>👋 Welcome to Farmer AI!</strong><br><br>
+                                    Select your language above and click any query below, or type your question.<br><br>
+                                    <em>Select language and click a query below to get started!</em>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input">
+                            <form id="chatForm" class="d-flex gap-2">
+                                <input type="text" class="form-control" id="messageInput" placeholder="Type your farming question..." autocomplete="off">
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+                                <button type="button" class="btn btn-success voice-btn" id="voiceBtn" title="Voice Input">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                            </form>
+                            <div class="mt-2 text-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-microphone me-1"></i>Click mic to speak in your language |
+                                    <i class="fas fa-volume-up me-1"></i>AI speaks in selected language
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p class="mb-0">&copy; 2024 Farmer AI Advisory System</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentLang = 'en';
+        let isListening = false;
+        let recognition;
+        let currentUtterance = null;
+
+        const quickQueries = {
+            'en': [
+                { text: '🌾 Which crop to grow?', query: 'Which crop should I grow in my field?' },
+                { text: '🧪 Fertilizer recommendations', query: 'Give me fertilizer recommendations' },
+                { text: '🐛 Pest control tips', query: 'How to control pests in my crops?' },
+                { text: '💧 Irrigation methods', query: 'What irrigation method should I use?' },
+                { text: '🌦️ Weather advisory', query: 'What is the weather advisory for farming?' },
+                { text: '📈 Market prices', query: 'Tell me current market prices of crops' },
+                { text: '🏛️ Government schemes', query: 'What government schemes are available for farmers?' },
+                { text: '🌱 Organic farming', query: 'How to do organic farming?' },
+                { text: '🌿 Soil health tips', query: 'How to improve soil health?' },
+                { text: '🌾 Harvest techniques', query: 'When and how to harvest crops?' },
+                { text: '🌰 Seed treatment', query: 'How to treat seeds before sowing?' },
+                { text: '💰 Income tips', query: 'How to increase my farm income?' }
+            ],
+            'hi': [
+                { text: '🌾 कौन सी फसल बोऊं?', query: 'मेरे खेत में कौन सी फसल बोनी चाहिए?' },
+                { text: '🧪 खाद की सलाह', query: 'मुझे खाद की सिफारिश दें' },
+                { text: '🐛 कीट नियंत्रण', query: 'मेरी फसलों में कीड़ों को कैसे नियंत्रित करें?' },
+                { text: '💧 सिंचाई तरीके', query: 'मुझे कौन सी सिंचाई विधि अपनानी चाहिए?' },
+                { text: '🌦️ मौसम सलाह', query: 'खेती के लिए मौसम सलाह दें' },
+                { text: '📈 बाजार भाव', query: 'फसलों के बर्तमान बाजार भाव बताएं' },
+                { text: '🏛️ सरकारी योजनाएं', query: 'किसानों के लिए कौन सी सरकारी योजनाएं हैं?' },
+                { text: '🌱 जैविक खेती', query: 'जैविक खेती कैसे करें?' },
+                { text: '🌿 मिट्टी की सेहत', query: 'मिट्टी की उर्वरता कैसे बढ़ाएं?' },
+                { text: '🌾 कटाई का समय', query: 'फसल की कटाई कब और कैसे करें?' },
+                { text: '🌰 बीज उपचार', query: 'बुवाई से पहले बीज का उपचार कैसे करें?' },
+                { text: '💰 आय बढ़ाने के उपाय', query: 'खेती से आय कैसे बढ़ाएं?' }
+            ],
+            'te': [
+                { text: '🌾 ఏ పంట పండించాలి?', query: 'నా పొలంలో ఏ పంట పండించాలి?' },
+                { text: '🧪 ఎరువుల సిఫార్సు', query: 'నాకు ఎరువుల సిఫార్సు ఇవ్వండి' },
+                { text: '🐛 తెగుళ్ల నియంత్రణ', query: 'నా పంటల్లో తెగుళ్లను ఎలా నియంత్రించాలి?' },
+                { text: '💧 నీటి పారుదల', query: 'నేను ఏ నీటి పారుదల విధానం ఉపయోగించాలి?' },
+                { text: '🌦️ వాతావరణ సలహా', query: 'వ్యవసాయం కోసం వాతావరణ సలహా ఇవ్వండి' },
+                { text: '📈 మార్కెట్ ధరలు', query: 'పంటల ప్రస్తుత మార్కెట్ ధరలు చెప్పండి' },
+                { text: '🏛️ ప్రభుత్వ పథకాలు', query: 'రైతుల కోసం ఏమేమి ప్రభుత్వ పథకాలు ఉన్నాయి?' },
+                { text: '🌱 సేంద్రీయ వ్యవసాయం', query: 'సేంద్రీయ వ్యవసాయం ఎలా చేయాలి?' },
+                { text: '🌿 నేల ఆరోగ్యం', query: 'నేల సారధారణను ఎలా మెరుగుపరచాలి?' },
+                { text: '🌾 కోత', query: 'పంటను ఎప్పుడు మరియు ఎలా కోయాలి?' },
+                { text: '🌰 విత్తన ట్రీట్‌మెంట్', query: 'విత్తనాలను ఎలా ట్రీట్ చేయాలి?' },
+                { text: '💰 ఆదాయం పెంచు', query: 'వ్యవసాయ ఆదాయాన్ని ఎలా పెంచుకోవాలి?' }
+            ],
+            'ta': [
+                { text: '🌾 எந்த பயிர் பயிர் செய்யவும்?', query: 'எனது வயலில் எந்த பயிர் பயிர் செய்ய வேண்டும்?' },
+                { text: '🧪 உரம் பரிந்துரை', query: 'உரம் பரிந்துரைக்கவும்' },
+                { text: '🐛 பூச்சி கட்டுப்பாடு', query: 'எனது பயிர்களில் பூச்சிகளை எவ்வாறு கட்டுப்படுத்துவது?' },
+                { text: '💧 பாசனம்', query: 'எந்த பாசன முறையைப் பயன்படுத்த வேண்டும்?' },
+                { text: '🌦️ வானிலை ஆலோசனை', query: 'விவசாயத்திற்கான வானிலை ஆலோசனை' },
+                { text: '📈 சந்தை விலைகள்', query: 'பயிர்களின் தற்போதைய சந்தை விலைகள்' },
+                { text: '🏛️ அரசு திட்டங்கள்', query: 'விவசாயிகளுக்கான அரசு திட்டங்கள்' },
+                { text: '🌱 இயற்கை விவசாயம்', query: 'இயற்கை விவசாயம் எவ்வாறு செய்வது?' },
+                { text: '🌿 மண் ஆரோக்கியம்', query: 'மண் வளத்தை எவ்வாறு மேம்படுத்துவது?' },
+                { text: '🌾 அறுவடை', query: 'பயிரை எப்போது மற்றும் எவ்வாறு அறுக்க வேண்டும்?' },
+                { text: '🌰 விதை சிகிச்சை', query: 'விதையை எப்படி பதப்படுத்துவது?' },
+                { text: '💰 வருமானம் அதிகரிக்க', query: 'விவசாய வருமானத்தை எவ்வாறு அதிகரிப்பது?' }
+            ],
+            'kn': [
+                { text: '🌾 ಯಾವ ಬೆಳೆ ಬೆಳೆಯಬೇಕು?', query: 'ನನ್ನ ಜಮೀನಿನಲ್ಲಿ ಯಾವ ಬೆಳೆ ಬೆಳೆಯಬೇಕು?' },
+                { text: '🧪 ಗೊಬ್ಬರ ಶಿಫಾರಸು', query: 'ಗೊಬ್ಬರ ಶಿಫಾರಸು ನೀಡಿ' },
+                { text: '🐛 ಕೀಟ ನಿಯಂತ್ರಣ', query: 'ನನ್ನ ಬೆಳೆಗಳಲ್ಲಿ ಕೀಟಗಳನ್ನು ಹೇಗೆ ನಿಯಂತ್ರಿಸುವುವು?' },
+                { text: '💧 ನೀರಾವರಿ', query: 'ಯಾವ ನೀರಾವರಿ ವಿಧಾನ ಬಳಸಬೇಕು?' },
+                { text: '🌦️ ಹವಾಮಾನ ಸಲಹೆ', query: 'ಕೃಷಿಗೆ ಹವಾಮಾನ ಸಲಹೆ' },
+                { text: '📈 ಮಾರುಕಟ್ಟೆ ಬೆಲೆ', query: 'ಬೆಳೆಗಳ ಪ್ರಸ್ತುತ ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು' },
+                { text: '🏛️ ಸರ್ಕಾರಿ ಯೋಜನೆ', query: 'ರೈತರಿಗೆ ಯಾವ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳಿವೆ?' },
+                { text: '🌱 ಸಾವಯವ ಕೃಷಿ', query: 'ಸಾವಯವ ಕೃಷಿ ಹೇಗೆ ಮಾಡುವುದು?' },
+                { text: '🌿 ಮಣ್ಣಿನ ಆರೋಗ್ಯ', query: 'ಮಣ್ಣಿನ ಫಲವತ್ತತೆಯನ್ನು ಹೇಗೆ ಹೆಚ್ಚಿಸುವುದು?' },
+                { text: '🌾 ಕೊಯ್ಲು', query: 'ಬೆಳೆಯನ್ನು ಯಾವಾಗ ಮತ್ತು ಹೇಗೆ ಕೊಯ್ಯುವುದು?' },
+                { text: '🌰 ಬಿತ್ತನೆ ಚಿಕಿತ್ಸೆ', query: 'ಬಿತ್ತನೆಯನ್ನು ಹೇಗೆ ಚಿಕಿತ್ಸೆ ಮಾಡುವುದು?' },
+                { text: '💰 ಆದಾಯ ಹೆಚ್ಚಳ', query: 'ಕೃಷಿ ಆದಾಯವನ್ನು ಹೇಗೆ ಹೆಚ್ಚಿಸುವುದು?' }
+            ]
+        };
+
+        function updateLangButtons(lang) {
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.querySelector(`.lang-btn[data-lang="${lang}"]`);
+            if (btn) btn.classList.add('active');
+            currentLang = lang;
+            updateQueryButtons();
+        }
+
+        function updateQueryButtons() {
+            const container = document.getElementById('queryButtons');
+            const queries = quickQueries[currentLang] || quickQueries['en'];
+            
+            container.innerHTML = queries.map(q => 
+                `<button class="query-btn" onclick="askQuery('${q.query.replace(/'/g, "\\'")}')">${q.text}</button>`
+            ).join('');
+        }
+
+        function askQuery(query) {
+            document.getElementById('messageInput').value = query;
+            document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+        }
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                updateLangButtons(this.dataset.lang);
+            });
+        });
+
+        document.getElementById('chatForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage(message, 'user');
+            input.value = '';
+
+            try {
+                const response = await fetch('/api/chatbot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message, language: currentLang })
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    addMessage(data.response, 'bot');
+                    
+                    const autoSpeak = document.getElementById('autoSpeak').checked;
+                    if (autoSpeak) {
+                        speakText(data.response, data.language || currentLang);
+                    }
+                }
+            } catch (error) {
+                addMessage('Error: Please try again.', 'bot');
+            }
+        });
+
+        function addMessage(text, sender) {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            div.innerHTML = `<div class="message-content">${text.replace(/\n/g, '<br>')}</div>`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        document.getElementById('voiceBtn').addEventListener('click', function() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('Voice input not supported. Please use Chrome or Edge browser.');
+                return;
+            }
+
+            if (isListening) {
+                if (recognition) recognition.stop();
+                return;
+            }
+
+            if (currentUtterance) {
+                speechSynthesis.cancel();
+                document.getElementById('speakingIndicator').style.display = 'none';
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = currentLang === 'en' ? 'en-IN' : 
+                              currentLang === 'hi' ? 'hi-IN' :
+                              currentLang === 'te' ? 'te-IN' :
+                              currentLang === 'ta' ? 'ta-IN' :
+                              currentLang === 'kn' ? 'kn-IN' : 'en-IN';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = function() {
+                isListening = true;
+                document.getElementById('voiceBtn').classList.add('listening');
+                document.getElementById('voiceBtn').innerHTML = '<i class="fas fa-stop"></i>';
+                document.getElementById('voiceBtn').title = 'Click to stop listening';
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('messageInput').value = transcript;
+                document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+            };
+
+            recognition.onend = function() {
+                isListening = false;
+                document.getElementById('voiceBtn').classList.remove('listening');
+                document.getElementById('voiceBtn').innerHTML = '<i class="fas fa-microphone"></i>';
+                document.getElementById('voiceBtn').title = 'Voice Input';
+            };
+
+            recognition.onerror = function(event) {
+                isListening = false;
+                document.getElementById('voiceBtn').classList.remove('listening');
+                document.getElementById('voiceBtn').innerHTML = '<i class="fas fa-microphone"></i>';
+                if (event.error !== 'no-speech') {
+                    console.log('Speech recognition error:', event.error);
+                }
+            };
+
+            recognition.start();
+        });
+
+        function speakText(text, lang) {
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel();
+                
+                const cleanText = text.replace(/[*#]/g, '').replace(/<[^>]*>/g, '');
+                
+                currentUtterance = new SpeechSynthesisUtterance(cleanText);
+                currentUtterance.lang = lang === 'en' ? 'en-IN' : 
+                               lang === 'hi' ? 'hi-IN' :
+                               lang === 'te' ? 'te-IN' :
+                               lang === 'ta' ? 'ta-IN' :
+                               lang === 'kn' ? 'kn-IN' : 'en-IN';
+                currentUtterance.rate = 0.9;
+                currentUtterance.pitch = 1;
+                currentUtterance.volume = 1;
+                
+                currentUtterance.onstart = function() {
+                    document.getElementById('speakingIndicator').style.display = 'inline-block';
+                };
+                
+                currentUtterance.onend = function() {
+                    currentUtterance = null;
+                    document.getElementById('speakingIndicator').style.display = 'none';
+                };
+                
+                currentUtterance.onerror = function() {
+                    currentUtterance = null;
+                    document.getElementById('speakingIndicator').style.display = 'none';
+                };
+                
+                setTimeout(() => {
+                    speechSynthesis.speak(currentUtterance);
+                }, 100);
+            }
+        }
+
+        function stopSpeaking() {
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel();
+                currentUtterance = null;
+                document.getElementById('speakingIndicator').style.display = 'none';
+            }
+        }
+
+        updateQueryButtons();
+    </script>
+    <style>
+        .voice-toggle {
+            display: flex;
+            align-items: center;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+        .message-content {
+            white-space: pre-line;
+        }
+        .chat-messages {
+            max-height: 400px;
+        }
+        .quick-queries {
+            background: #f8f9fa;
+        }
+        .quick-queries h6 {
+            color: #333;
+            font-weight: 600;
+        }
+        .query-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .query-btn {
+            padding: 8px 15px;
+            border: 2px solid #4CAF50;
+            border-radius: 20px;
+            background: white;
+            color: #2E7D32;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .query-btn:hover {
+            background: #4CAF50;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .speaking-badge {
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            animation: pulse 1.5s infinite;
+        }
+        .voice-indicators {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .voice-btn.listening {
+            background: var(--danger) !important;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        @media (max-width: 768px) {
+            .query-btn {
+                padding: 6px 12px;
+                font-size: 0.75rem;
+            }
+            .query-buttons {
+                gap: 5px;
+            }
+        }
+    </style>
+</body>
+</html>

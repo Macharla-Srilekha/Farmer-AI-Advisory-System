@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pest Detection - Farmer AI Advisory System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-leaf me-2"></i>Farmer AI</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/chatbot">AI Chat</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/pest_detection">Pest Detection</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container">
+            <h2><i class="fas fa-bug me-2"></i>Pest & Disease Detection</h2>
+            <p>Upload a leaf photo for AI-powered disease detection</p>
+        </div>
+    </div>
+
+    <section class="main-content">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <form id="pestForm" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label class="form-label">Select Crop Type</label>
+                                    <select class="form-select" id="cropType" name="cropType" required>
+                                        <option value="rice">Rice (धान)</option>
+                                        <option value="wheat">Wheat (गेहूं)</option>
+                                        <option value="cotton">Cotton (कपास)</option>
+                                        <option value="maize">Maize (मक्का)</option>
+                                        <option value="groundnut">Groundnut (मूंगफली)</option>
+                                        <option value="tomato">Tomato (टमाटर)</option>
+                                        <option value="potato">Potato (आलू)</option>
+                                        <option value="general">General (Other crops)</option>
+                                    </select>
+                                </div>
+
+                                <div class="upload-area" id="uploadArea">
+                                    <i class="fas fa-cloud-upload-alt fa-4x text-success mb-3"></i>
+                                    <h5>Drop leaf image here or click to upload</h5>
+                                    <p class="text-muted">Supports: JPG, PNG (Max 5MB)</p>
+                                    <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
+                                    <button type="button" class="btn btn-primary mt-3" onclick="document.getElementById('imageInput').click()">
+                                        <i class="fas fa-folder-open me-2"></i>Browse Files
+                                    </button>
+                                </div>
+
+                                <div id="imagePreview" class="text-center mt-3" style="display: none;">
+                                    <img id="previewImg" class="preview-image" alt="Preview">
+                                    <button type="button" class="btn btn-danger btn-sm mt-2" onclick="clearImage()">
+                                        <i class="fas fa-trash me-1"></i>Remove
+                                    </button>
+                                </div>
+
+                                <div class="text-center mt-4">
+                                    <button type="submit" class="btn btn-success btn-lg" id="detectBtn" disabled>
+                                        <i class="fas fa-search me-2"></i>Detect Disease
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="resultsArea" class="mt-4" style="display: none;">
+                        <div class="result-card" id="resultCard">
+                            <div id="resultContent"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="info-box">
+                        <h5><i class="fas fa-camera me-2"></i>Photo Tips for Best Results</h5>
+                        <ul class="tips-list">
+                            <li>Take close-up photos of affected leaves</li>
+                            <li>Ensure good lighting (natural daylight works best)</li>
+                            <li>Focus on leaves showing disease symptoms</li>
+                            <li>Include the affected area clearly in frame</li>
+                            <li>Avoid blurry or out-of-focus images</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p class="mb-0">&copy; 2024 Farmer AI Advisory System</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const detectBtn = document.getElementById('detectBtn');
+
+        uploadArea.addEventListener('click', () => imageInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                imageInput.files = e.dataTransfer.files;
+                showPreview(e.dataTransfer.files[0]);
+            }
+        });
+
+        imageInput.addEventListener('change', function() {
+            if (this.files.length) {
+                showPreview(this.files[0]);
+            }
+        });
+
+        function showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                imagePreview.style.display = 'block';
+                detectBtn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearImage() {
+            imageInput.value = '';
+            imagePreview.style.display = 'none';
+            detectBtn.disabled = true;
+            document.getElementById('resultsArea').style.display = 'none';
+        }
+
+        document.getElementById('pestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            detectBtn.innerHTML = '<span class="loading-spinner me-2"></span>Analyzing...';
+            detectBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/pest_detection', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    alert('Error: ' + (data.error || 'Detection failed'));
+                }
+            } catch (error) {
+                alert('Error analyzing image. Please try again.');
+            } finally {
+                detectBtn.innerHTML = '<i class="fas fa-search me-2"></i>Detect Disease';
+                detectBtn.disabled = false;
+            }
+        });
+
+        function displayResults(data) {
+            document.getElementById('resultsArea').style.display = 'block';
+            const resultCard = document.getElementById('resultCard');
+            
+            let confidenceClass = 'confidence-medium';
+            if (data.confidence) {
+                const conf = parseInt(data.confidence);
+                if (conf >= 80) confidenceClass = 'confidence-high';
+                else if (conf >= 60) confidenceClass = 'confidence-medium';
+                else confidenceClass = 'confidence-low';
+            }
+
+            let resultClass = data.result.includes('Healthy') ? 'healthy-result' : 
+                             data.result.includes('Not Recognized') ? 'info' : 'disease-result';
+
+            let tipsHtml = data.tips ? data.tips.map(tip => `<li>${tip}</li>`).join('') : '';
+
+            resultCard.innerHTML = `
+                <div class="${resultClass}">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h4 class="mb-0"><i class="fas fa-check-circle me-2"></i>Analysis Result</h4>
+                        <span class="confidence-badge ${confidenceClass}">${data.confidence || 'N/A'}</span>
+                    </div>
+                    <div class="result-text">${data.result}</div>
+                </div>
+                ${tipsHtml ? `
+                <div class="mt-4">
+                    <h5><i class="fas fa-medkit me-2"></i>Treatment Tips</h5>
+                    <ul class="tips-list">${tipsHtml}</ul>
+                </div>` : ''}
+            `;
+        }
+    </script>
+</body>
+</html>

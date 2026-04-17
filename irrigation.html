@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Irrigation Planning - Farmer AI Advisory System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-leaf me-2"></i>Farmer AI</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/chatbot">AI Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pest_detection">Pest Detection</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container">
+            <h2><i class="fas fa-tint me-2"></i>Irrigation Planning</h2>
+            <p>Water management and irrigation method recommendations</p>
+        </div>
+    </div>
+
+    <section class="main-content">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <form id="irrigationForm">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Irrigation Method</label>
+                                        <select class="form-select" id="method" required>
+                                            <option value="">Select Method</option>
+                                            <option value="drip">Drip Irrigation</option>
+                                            <option value="sprinkler">Sprinkler Irrigation</option>
+                                            <option value="flood">Flood Irrigation</option>
+                                            <option value="furrow">Furrow Irrigation</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Crop Type</label>
+                                        <select class="form-select" id="crop">
+                                            <option value="general">General</option>
+                                            <option value="rice">Rice</option>
+                                            <option value="wheat">Wheat</option>
+                                            <option value="cotton">Cotton</option>
+                                            <option value="vegetables">Vegetables</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-water me-2"></i>Get Recommendations
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="resultsArea" class="mt-4" style="display: none;">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="text-success"><i class="fas fa-check-circle me-2"></i><span id="methodName"></span></h4>
+                                
+                                <div class="row g-3 mt-3">
+                                    <div class="col-md-6">
+                                        <div class="info-box">
+                                            <h5><i class="fas fa-chart-line me-2"></i>Efficiency</h5>
+                                            <p class="mb-0 h4" id="efficiency"></p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-box">
+                                            <h5><i class="fas fa-piggy-bank me-2"></i>Water Saving</h5>
+                                            <p class="mb-0 h4" id="waterSaving"></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <p><strong>Cost per acre:</strong> <span id="cost"></span></p>
+                                        <p><strong>Subsidy Available:</strong> <span id="subsidy" class="text-success"></span></p>
+                                        <p><strong>Best for:</strong> <span id="bestFor"></span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>${'$'}{'{'}}Crop Schedule:</strong></p>
+                                        <p id="cropSchedule"></p>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="alert alert-success">
+                                            <h6><i class="fas fa-plus me-2"></i>Advantages</h6>
+                                            <ul class="mb-0" id="prosList"></ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="alert alert-warning">
+                                            <h6><i class="fas fa-minus me-2"></i>Disadvantages</h6>
+                                            <ul class="mb-0" id="consList"></ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h4 class="mb-4"><i class="fas fa-info-circle me-2"></i>Irrigation Methods Comparison</h4>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-tint fa-3x text-primary mb-3"></i>
+                            <h5>Drip</h5>
+                            <p class="text-success">90-95% Efficiency</p>
+                            <small>Best water savings</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-cloud-rain fa-3x text-info mb-3"></i>
+                            <h5>Sprinkler</h5>
+                            <p class="text-success">70-80% Efficiency</p>
+                            <small>Good for uneven land</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-water fa-3x text-warning mb-3"></i>
+                            <h5>Flood</h5>
+                            <p class="text-danger">30-50% Efficiency</p>
+                            <small>Low cost, high waste</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-rows fa-3x text-secondary mb-3"></i>
+                            <h5>Furrow</h5>
+                            <p class="text-warning">50-60% Efficiency</p>
+                            <small>Better than flood</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p class="mb-0">&copy; 2024 Farmer AI Advisory System</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('irrigationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const method = document.getElementById('method').value;
+            const crop = document.getElementById('crop').value;
+
+            try {
+                const response = await fetch('/api/irrigation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ method: method, crop: crop })
+                });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    displayResults(data.irrigation);
+                }
+            } catch (error) {
+                alert('Error getting recommendations. Please try again.');
+            }
+        });
+
+        function displayResults(data) {
+            document.getElementById('resultsArea').style.display = 'block';
+            document.getElementById('methodName').textContent = data.name;
+            document.getElementById('efficiency').textContent = data.efficiency;
+            document.getElementById('waterSaving').textContent = data.water_saving;
+            document.getElementById('cost').textContent = data.cost;
+            document.getElementById('subsidy').textContent = data.subsidy;
+            document.getElementById('bestFor').textContent = data.best_for;
+            document.getElementById('cropSchedule').textContent = data.crop_schedule;
+            
+            document.getElementById('prosList').innerHTML = data.pros.map(p => `<li>${p}</li>`).join('');
+            document.getElementById('consList').innerHTML = data.cons.map(c => `<li>${c}</li>`).join('');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Prices - Farmer AI Advisory System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-leaf me-2"></i>Farmer AI</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/chatbot">AI Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pest_detection">Pest Detection</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container">
+            <h2><i class="fas fa-chart-line me-2"></i>Market Prices</h2>
+            <p>Live MSP and market prices for agricultural commodities</p>
+        </div>
+    </div>
+
+    <section class="main-content">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Region:</strong> <span id="region">Central India Mandi</span> | 
+                        <strong>Last Updated:</strong> <span id="lastUpdated">--</span>
+                        <button class="btn btn-sm btn-primary float-end" onclick="loadMarketPrices()">
+                            <i class="fas fa-refresh me-1"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="market-table-responsive">
+                <table class="table market-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Commodity</th>
+                            <th>Current Price</th>
+                            <th>MSP</th>
+                            <th>Change</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody id="marketTable">
+                        <tr><td colspan="5" class="text-center">Loading prices...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-md-4">
+                    <div class="card border-success">
+                        <div class="card-body">
+                            <h5 class="text-success"><i class="fas fa-thumbs-up me-2"></i>Sell Now</h5>
+                            <ul class="list-unstyled mt-3" id="sellNow">
+                                <li>Loading...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-warning">
+                        <div class="card-body">
+                            <h5 class="text-warning"><i class="fas fa-pause me-2"></i>Hold</h5>
+                            <ul class="list-unstyled mt-3" id="holdList">
+                                <li>Loading...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-danger">
+                        <div class="card-body">
+                            <h5 class="text-danger"><i class="fas fa-shopping-cart me-2"></i>Buy</h5>
+                            <ul class="list-unstyled mt-3" id="buyList">
+                                <li>Loading...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="info-box">
+                        <h5><i class="fas fa-lightbulb me-2"></i>Market Tips</h5>
+                        <ul class="tips-list">
+                            <li>Compare prices across nearby mandis before selling</li>
+                            <li>Use eNAM platform for better price discovery</li>
+                            <li>Prices are usually lower during peak harvest season</li>
+                            <li>Consider storage if prices are expected to rise later</li>
+                            <li>Join Farmer Producer Organizations (FPOs) for collective bargaining</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h4 class="mb-4"><i class="fas fa-info-circle me-2"></i>MSP Information</h4>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>What is MSP?</h5>
+                            <p>Minimum Support Price (MSP) is the minimum price set by the government to protect farmers against any sharp fall in prices during bumper harvest years.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>Where to Sell?</h5>
+                            <p>Sell at nearest APMC mandi or use eNAM platform for online trading across states. Keep all sale receipts for records.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p class="mb-0">&copy; 2024 Farmer AI Advisory System</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function loadMarketPrices() {
+            try {
+                const response = await fetch('/api/market');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateMarketUI(data);
+                }
+            } catch (error) {
+                console.error('Error loading market prices:', error);
+            }
+        }
+
+        function updateMarketUI(data) {
+            document.getElementById('region').textContent = data.region;
+            document.getElementById('lastUpdated').textContent = data.last_updated;
+
+            const tableBody = document.getElementById('marketTable');
+            tableBody.innerHTML = '';
+
+            data.commodities.forEach(item => {
+                const trendIcon = item.trend === 'up' ? 'fa-arrow-up text-success' : 
+                                 item.trend === 'down' ? 'fa-arrow-down text-danger' : 'fa-minus text-warning';
+                const trendClass = item.trend === 'up' ? 'trend-up' : 
+                                  item.trend === 'down' ? 'trend-down' : 'trend-stable';
+                
+                tableBody.innerHTML += `
+                    <tr>
+                        <td><strong>${item.name}</strong></td>
+                        <td>₹${item.price}/${item.unit}</td>
+                        <td>${item.msp ? '₹' + item.msp : 'N/A'}</td>
+                        <td class="${trendClass}">${item.change > 0 ? '+' : ''}${item.change}</td>
+                        <td><i class="fas ${trendIcon}"></i> ${item.trend}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('sellNow').innerHTML = data.recommendations.sell_now.map(item => `<li>${item}</li>`).join('');
+            document.getElementById('holdList').innerHTML = data.recommendations.hold.map(item => `<li>${item}</li>`).join('');
+            document.getElementById('buyList').innerHTML = data.recommendations.buy.map(item => `<li>${item}</li>`).join('');
+        }
+
+        loadMarketPrices();
+        setInterval(loadMarketPrices, 60000);
+    </script>
+</body>
+</html>

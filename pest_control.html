@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pest Control - Farmer AI Advisory System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-leaf me-2"></i>Farmer AI</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/chatbot">AI Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pest_detection">Pest Detection</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container">
+            <h2><i class="fas fa-shield-alt me-2"></i>Pest Control Guide</h2>
+            <p>Expert tips for pest and disease management</p>
+        </div>
+    </div>
+
+    <section class="main-content">
+        <div class="container">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="fas fa-leaf me-2"></i>Select Your Crop</h5>
+                    <div class="crop-selector">
+                        <button class="crop-btn" data-crop="all">
+                            <span class="crop-icon">🌾</span>
+                            <span>All Crops</span>
+                        </button>
+                        <button class="crop-btn" data-crop="rice">
+                            <span class="crop-icon">🌾</span>
+                            <span>Rice</span>
+                        </button>
+                        <button class="crop-btn" data-crop="wheat">
+                            <span class="crop-icon">🌾</span>
+                            <span>Wheat</span>
+                        </button>
+                        <button class="crop-btn" data-crop="cotton">
+                            <span class="crop-icon">🌿</span>
+                            <span>Cotton</span>
+                        </button>
+                        <button class="crop-btn" data-crop="maize">
+                            <span class="crop-icon">🌽</span>
+                            <span>Maize</span>
+                        </button>
+                        <button class="crop-btn" data-crop="groundnut">
+                            <span class="crop-icon">🥜</span>
+                            <span>Groundnut</span>
+                        </button>
+                        <button class="crop-btn" data-crop="sugarcane">
+                            <span class="crop-icon">🎋</span>
+                            <span>Sugarcane</span>
+                        </button>
+                        <button class="crop-btn" data-crop="tomato">
+                            <span class="crop-icon">🍅</span>
+                            <span>Tomato</span>
+                        </button>
+                        <button class="crop-btn" data-crop="potato">
+                            <span class="crop-icon">🥔</span>
+                            <span>Potato</span>
+                        </button>
+                        <button class="crop-btn" data-crop="onion">
+                            <span class="crop-icon">🧅</span>
+                            <span>Onion</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pestResults"></div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="info-box">
+                        <h5><i class="fas fa-lightbulb me-2"></i>General IPM Tips</h5>
+                        <ul class="tips-list">
+                            <li>Practice crop rotation to break pest cycles</li>
+                            <li>Use yellow sticky traps for monitoring</li>
+                            <li>Release Trichogramma wasps for biological control</li>
+                            <li>Remove and destroy infected plant parts</li>
+                            <li>Maintain proper plant spacing for air circulation</li>
+                            <li>Use neem oil spray for organic pest control</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p class="mb-0">&copy; 2024 Farmer AI Advisory System</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const pestData = {
+            'rice': [
+                {
+                    name: 'Rice Blast',
+                    symptoms: 'Diamond shaped lesions on leaves, neck and panicle',
+                    organic: ['Neem oil spray 5ml/L water', 'Trichoderma viride 5g/L', 'Garlic-chili extract spray', 'Ash dusting on affected areas', 'Apply Pseudomonas fluorescens 10g/L'],
+                    inorganic: ['Tricyclazole 0.6g/L spray', 'Apply twice at 15 days interval', 'Edifenphos 1ml/L alternative', 'Isoprothiolane 1ml/L'],
+                    prevention: 'Use resistant varieties like IR-64, avoid excess nitrogen, maintain proper spacing'
+                },
+                {
+                    name: 'Bacterial Leaf Blight',
+                    symptoms: 'Yellow to white lesions from leaf tip, bacterial ooze',
+                    organic: ['Remove infected leaves immediately', 'Apply biocontrol agents', 'Neem cake soil application 250kg/ha', 'Copper-based organic sprays'],
+                    inorganic: ['Copper oxychloride 3g/L spray', 'Streptocycline 100ppm spray', 'Apply at early stage', 'Avoid working in wet fields'],
+                    prevention: 'Use certified seeds, avoid excess nitrogen, improve field drainage'
+                },
+                {
+                    name: 'Brown Spot',
+                    symptoms: 'Brown oval spots on leaves with yellow halo',
+                    organic: ['Neem oil 5ml/L spray', 'Trichoderma viride 5g/L', 'Improve soil organic matter', 'Balanced fertilization'],
+                    inorganic: ['Mancozeb 2.5g/L spray', 'Apply 2-3 times at 10 day interval', 'Zinc sulfate 25kg/ha', 'Propiconazole 1ml/L'],
+                    prevention: 'Use healthy seeds, balanced NPK, proper irrigation'
+                },
+                {
+                    name: 'Stem Borer',
+                    symptoms: 'Dead heart in young plants, white ears at flowering',
+                    organic: ['Pheromone traps 8-10/ha', 'Release Trichogramma wasps', 'Neem oil 5ml/L spray', 'Remove affected shoots'],
+                    inorganic: ['Chlorpyrifos 2ml/L spray', 'Cartap hydrochloride 1g/L', 'Apply at early tillering', 'Fipronil 0.3G granules'],
+                    prevention: 'Use resistant varieties, early planting, remove crop residues'
+                },
+                {
+                    name: 'Gall Midge',
+                    symptoms: 'Silver shoot formation, leaf sheath damage',
+                    organic: ['Neem cake 250kg/ha', 'Release parasitic wasps', 'Remove affected shoots', 'Trap cropping'],
+                    inorganic: ['Carbaryl 4G granules 25kg/ha', 'Fipronil 0.3G granules', 'Apply in nursery', 'Monocrotophos 1.6ml/L spray'],
+                    prevention: 'Early planting, synchronous planting, use resistant varieties'
+                }
+            ],
+            'wheat': [
+                {
+                    name: 'Wheat Rust (Yellow/Black/Brown)',
+                    symptoms: 'Orange/brown/yellow pustules on leaves and stem',
+                    organic: ['Remove infected leaves immediately', 'Neem cake soil application 250kg/ha', 'Baking soda spray 1tbsp/L', 'Sulfur dust application', 'Improve air circulation'],
+                    inorganic: ['Propiconazole 1ml/L spray', 'Tebuconazole 0.5ml/L', 'Apply at first sign of infection', 'Mancozeb 2.5g/L preventive spray'],
+                    prevention: 'Use resistant varieties like DBW 187, HD 2967, timely sowing'
+                },
+                {
+                    name: 'Powdery Mildew',
+                    symptoms: 'White powdery coating on leaves, yellowing',
+                    organic: ['Baking soda 1tbsp + soap/L spray', 'Neem oil 5ml/L', 'Milk spray 1:9 with water', 'Garlic extract spray', 'Trichoderma viride'],
+                    inorganic: ['Sulfur dust 25kg/ha', 'Wettable Sulfur 3g/L spray', 'Tebuconazole 0.5ml/L', 'Hexaconazole 1ml/L'],
+                    prevention: 'Use resistant varieties, proper spacing, avoid excess nitrogen'
+                },
+                {
+                    name: 'Termites',
+                    symptoms: 'Wilting plants, damaged roots and stem base',
+                    organic: ['Neem cake 250kg/ha', 'Chillies and garlic in irrigation', 'Organic matter rich soil', 'Remove crop residues'],
+                    inorganic: ['Chlorpyrifos 2ml/L drench', 'Imidacloprid 2ml/L drench', 'Fipronil 0.3G granules', 'Apply at sowing'],
+                    prevention: 'Clean cultivation, avoid drought stress, proper irrigation'
+                },
+                {
+                    name: 'Aphids',
+                    symptoms: 'Curling leaves, sticky honeydew, sooty mold',
+                    organic: ['Neem oil 5ml/L spray', 'Ladybird beetles release', 'Soap water spray', 'Garlic-chili extract', 'Knock off with water jet'],
+                    inorganic: ['Imidacloprid 0.5ml/L spray', 'Oxydemeton methyl 1ml/L', 'Thiamethoxam 0.2g/L', 'Apply during early morning'],
+                    prevention: 'Use resistant varieties, avoid excess nitrogen, monitor regularly'
+                }
+            ],
+            'cotton': [
+                {
+                    name: 'Pink Bollworm',
+                    symptoms: 'Pink larvae inside cotton bolls, damaged seeds',
+                    organic: ['Pheromone traps 8/ha', 'Neem oil 5ml/L spray', 'Spinosad 0.2ml/L bio-pesticide', 'Release Trichogramma wasps', 'Remove and destroy infected bolls'],
+                    inorganic: ['Chlorpyrifos 2ml/L spray', 'Quinalphos 1.5ml/L', 'Profenofos 1ml/L', 'Apply at boll formation stage'],
+                    prevention: 'Early sowing, pheromone traps, crop rotation, destroy cotton stalks'
+                },
+                {
+                    name: 'Whitefly',
+                    symptoms: 'Yellowing leaves, sticky honeydew, sooty mold',
+                    organic: ['Yellow sticky traps 40-50/ha', 'Neem oil 5ml/L spray', 'Neem cake 250kg/ha', 'Remove weeds regularly', 'Encourage ladybirds'],
+                    inorganic: ['Imidacloprid 0.5ml/L spray', 'Acetamiprid 0.2g/L', 'Oxydemeton methyl 1ml/L', 'Apply at early stage'],
+                    prevention: 'Use certified seeds, avoid ratoon crop, destroy crop residues'
+                },
+                {
+                    name: 'Aphids (Jassids)',
+                    symptoms: 'Yellowing, leaf curling, stunted growth',
+                    organic: ['Neem oil 5ml/L spray', 'Soap water spray', 'Release ladybird beetles', 'Remove affected parts', 'Garlic extract spray'],
+                    inorganic: ['Imidacloprid 0.5ml/L', 'Oxydemeton methyl 1ml/L', 'Acetamiprid 0.2g/L', 'Thiamethoxam 0.2g/L'],
+                    prevention: 'Use resistant varieties, balanced fertilization, remove alternate hosts'
+                },
+                {
+                    name: 'Boll Rot',
+                    symptoms: 'Bolls turn brown and rot, bad odor',
+                    organic: ['Remove infected bolls immediately', 'Improve air circulation', 'Neem oil preventive spray', 'Avoid waterlogging'],
+                    inorganic: ['Copper oxychloride 3g/L spray', 'Mancozeb 2.5g/L', 'Apply preventive fungicide', 'Benzimidazole based fungicides'],
+                    prevention: 'Proper spacing, timely irrigation, balanced nutrition, pest control'
+                },
+                {
+                    name: 'Leaf Curl Virus',
+                    symptoms: 'Leaf curling, thickening of veins, stunted plants',
+                    organic: ['Remove infected plants immediately', 'Use yellow sticky traps', 'Neem oil for vector control', 'Destroy alternate hosts'],
+                    inorganic: ['Imidacloprid 0.5ml/L for whitefly control', 'Acetamiprid spray', 'Systemic insecticides for vectors', 'Remove infected plants'],
+                    prevention: 'Use resistant varieties, control whitefly vectors, early sowing'
+                }
+            ],
+            'maize': [
+                {
+                    name: 'Fall Armyworm',
+                    symptoms: 'Large irregular holes in leaves, fecal matter in whorl',
+                    organic: ['Neem oil 5ml/L in whorl', 'Baculovirus spray', 'Hand picking caterpillars', 'Trichogramma wasps release', 'Sand or ash in whorl'],
+                    inorganic: ['Chlorantraniliprole 0.4ml/L in whorl', 'Spinosad 0.2ml/L', 'Emamectin benzoate 0.4g/L', 'Apply at early instar stage'],
+                    prevention: 'Early planting, crop rotation, destroy residues, monitoring with pheromone traps'
+                },
+                {
+                    name: 'Stem Borer',
+                    symptoms: 'Dead heart in seedlings, bore holes in stem',
+                    organic: ['Release Trichogramma wasps', 'Neem cake 250kg/ha', 'Remove affected plants', 'Pheromone traps'],
+                    inorganic: ['Cartap hydrochloride 4G granules', 'Fipronil 0.3G in whorl', 'Chlorpyrifos 2ml/L spray', 'Apply at sowing'],
+                    prevention: 'Use resistant hybrids, early sowing, destroy crop residues'
+                },
+                {
+                    name: 'Turcicum Leaf Blight',
+                    symptoms: 'Long elliptical lesions on leaves, yellowing',
+                    organic: ['Remove infected leaves', 'Improve air circulation', 'Neem oil spray', 'Balanced nutrition'],
+                    inorganic: ['Mancozeb 2.5g/L spray', 'Propiconazole 1ml/L', 'Apply at disease onset', 'Zinc sulfate spray'],
+                    prevention: 'Use resistant hybrids, crop rotation, balanced fertilization'
+                },
+                {
+                    name: 'Maydis Leaf Blight',
+                    symptoms: 'Small lesions throughout leaf, severe defoliation',
+                    organic: ['Remove infected debris', 'Crop rotation', 'Neem oil preventive spray', 'Improve drainage'],
+                    inorganic: ['Mancozeb 2.5g/L spray', 'Zinc based fungicides', 'Propiconazole 1ml/L', 'Apply twice at 10 day interval'],
+                    prevention: 'Use resistant varieties, balanced fertilizers, proper spacing'
+                }
+            ],
+            'groundnut': [
+                {
+                    name: 'Tikka Disease (Leaf Spot)',
+                    symptoms: 'Brown spots with dark borders on leaves',
+                    organic: ['Neem oil 5ml/L spray', 'Trichoderma viride 5g/L', 'Remove infected leaves', 'Improve air circulation', 'Copper oxychloride organic'],
+                    inorganic: ['Chlorothalonil 2g/L spray', 'Apply 3 times at 15 days interval', 'Hexaconazole 1ml/L', 'Mancozeb 2.5g/L'],
+                    prevention: 'Use certified seeds, proper spacing, crop rotation, avoid stress'
+                },
+                {
+                    name: 'Rust Disease',
+                    symptoms: 'Orange-brown pustules on leaves, premature defoliation',
+                    organic: ['Remove infected plants', 'Neem oil spray', 'Improve air circulation', 'Avoid water stress', 'Remove crop debris'],
+                    inorganic: ['Mancozeb 2.5g/L spray', 'Propiconazole 1ml/L', 'Apply at first sign', 'Tebuconazole 0.5ml/L'],
+                    prevention: 'Use resistant varieties, early sowing, proper spacing'
+                },
+                {
+                    name: 'Aphids & Jassids',
+                    symptoms: 'Yellowing, stunted growth, leaf curling',
+                    organic: ['Neem oil 5ml/L spray', 'Soap water spray', 'Remove weeds', 'Encourage natural predators'],
+                    inorganic: ['Imidacloprid 0.5ml/L spray', 'Oxydemeton methyl 1ml/L', 'Apply at early stage', 'Thiamethoxam 0.2g/L'],
+                    prevention: 'Use certified seeds, avoid late sowing, remove alternate hosts'
+                },
+                {
+                    name: 'Termites',
+                    symptoms: 'Wilting, damaged roots and pegs',
+                    organic: ['Neem cake 250kg/ha', 'Chillies in irrigation water', 'Rich organic matter', 'Good irrigation'],
+                    inorganic: ['Chlorpyrifos 2ml/L drench', 'Imidacloprid 2ml/L drench', 'Fipronil granules', 'Apply at sowing'],
+                    prevention: 'Avoid drought stress, use well-drained soil, avoid crop residues'
+                }
+            ],
+            'sugarcane': [
+                {
+                    name: 'Red Rot',
+                    symptoms: 'Yellowing, drying of leaves, red pith inside stalk',
+                    organic: ['Remove infected plants immediately', 'Burn infected debris', 'Neem cake soil application', 'Crop rotation 2-3 years'],
+                    inorganic: ['Copper based fungicides spray', 'Carbendazim 1g/L', 'Apply to affected areas', 'Drench soil with fungicide'],
+                    prevention: 'Use resistant varieties, healthy seed sets, crop rotation, avoid waterlogging'
+                },
+                {
+                    name: 'Smut Disease',
+                    symptoms: 'Long dark Whip-like projection from top',
+                    organic: ['Remove infected plants', 'Hot water treatment 50°C for 30 min', 'Neem cake application', 'Bio-control agents'],
+                    inorganic: ['Triadimefon 1ml/L spray', 'Apply at early stage', 'Systemic fungicides', 'Treat seed sets before planting'],
+                    prevention: 'Use healthy seed sets, resistant varieties, heat treatment of seed sets'
+                },
+                {
+                    name: 'Poke Moth Borer',
+                    symptoms: 'Dead heart, bore holes at internodes',
+                    organic: ['Remove affected shoots', 'Release Trichogramma wasps', 'Pheromone traps', 'Neem oil spray'],
+                    inorganic: ['Chlorpyrifos 2ml/L spray', 'Monocrotophos 1.6ml/L', 'Apply in whorl', 'Fipronil granules'],
+                    prevention: 'Use healthy seed sets, early planting, destroy crop residues'
+                },
+                {
+                    name: 'Top Borer',
+                    symptoms: 'Dead heart in upper leaves, bore holes',
+                    organic: ['Remove affected tops', 'Release parasitoids', 'Pheromone traps', 'Neem cake 250kg/ha'],
+                    inorganic: ['Monocrotophos 1.6ml/L spray', 'Cartap hydrochloride', 'Apply at early stage', 'Fipronil 0.3G'],
+                    prevention: 'Early planting, use resistant varieties, trash mulching'
+                }
+            ],
+            'tomato': [
+                {
+                    name: 'Late Blight',
+                    symptoms: 'Water soaked lesions, white mold on undersides',
+                    organic: ['Bordeaux mixture spray', 'Baking soda 1tbsp + soap/L', 'Improve air circulation', 'Remove affected fruits immediately', 'Mulching'],
+                    inorganic: ['Mancozeb 2.5g/L spray', 'Metalaxyl 2g/L', 'Cymoxanil+Mancozeb combo', 'Apply preventively'],
+                    prevention: 'Use resistant hybrids, avoid overhead irrigation, proper spacing'
+                },
+                {
+                    name: 'Early Blight',
+                    symptoms: 'Dark concentric rings on leaves, yellow halos',
+                    organic: ['Remove lower infected leaves', 'Neem oil spray', 'Trichoderma viride', 'Mulching', 'Improve air circulation'],
+                    inorganic: ['Chlorothalonil 2g/L spray', 'Mancozeb 2.5g/L', 'Azoxystrobin 1ml/L', 'Apply at first sign'],
+                    prevention: 'Crop rotation, use certified seeds, balanced fertilization'
+                },
+                {
+                    name: 'Fruit Borer',
+                    symptoms: 'Holes in fruits, caterpillar inside',
+                    organic: ['Hand picking caterpillars', 'Pheromone traps', 'Neem oil 5ml/L spray', 'Bacillus thuringiensis spray', 'Remove affected fruits'],
+                    inorganic: ['Chlorantraniliprole 0.4ml/L', 'Spinosad 0.2ml/L', 'Emamectin benzoate 0.4g/L', 'Apply at fruit formation'],
+                    prevention: 'Use pheromone traps, timely harvesting, destroy crop residues'
+                },
+                {
+                    name: 'Whitefly & Virus',
+                    symptoms: 'Leaf curling, yellowing, stunted plants',
+                    organic: ['Yellow sticky traps', 'Neem oil 5ml/L spray', 'Remove infected plants', 'Mulching', 'Encourage predators'],
+                    inorganic: ['Imidacloprid 0.5ml/L spray', 'Acetamiprid 0.2g/L', 'Apply for vector control', 'Remove infected plants'],
+                    prevention: 'Use resistant hybrids, control whitefly, avoid ratoon crop'
+                },
+                {
+                    name: 'Leaf Miners',
+                    symptoms: 'White serpentine tunnels in leaves',
+                    organic: ['Remove affected leaves', 'Yellow sticky traps', 'Neem oil spray', 'Parasitic wasps release'],
+                    inorganic: ['Cyromazine 1g/L spray', 'Abamectin 0.4ml/L', 'Apply at early stage', 'Dimethoate 1ml/L'],
+                    prevention: 'Use yellow traps for monitoring, remove weeds, crop rotation'
+                }
+            ],
+            'potato': [
+                {
+                    name: 'Late Blight',
+                    symptoms: 'Water soaked lesions, white mold, tuber rot',
+                    organic: ['Bordeaux mixture spray', 'Improve air circulation', 'Remove infected plants', 'Avoid overhead irrigation', 'Copper-based sprays'],
+                    inorganic: ['Mancozeb 2.5g/L spray', 'Metalaxyl 2g/L', 'Cyazofamid 0.6ml/L', 'Apply preventively every 10 days'],
+                    prevention: 'Use healthy seed potatoes, avoid low areas, proper earthing up'
+                },
+                {
+                    name: 'Early Blight',
+                    symptoms: 'Dark brown concentric spots, yellowing, defoliation',
+                    organic: ['Remove infected leaves', 'Neem oil spray', 'Trichoderma viride', 'Improve air circulation', 'Mulching'],
+                    inorganic: ['Mancozeb 2.5g/L spray', 'Chlorothalonil 2g/L', 'Azoxystrobin 1ml/L', 'Apply at disease onset'],
+                    prevention: 'Crop rotation, use certified seeds, balanced NPK, proper spacing'
+                },
+                {
+                    name: 'Aphids',
+                    symptoms: 'Curling leaves, sticky honeydew, virus transmission',
+                    organic: ['Neem oil 5ml/L spray', 'Soap water spray', 'Yellow sticky traps', 'Remove weeds', 'Encourage ladybirds'],
+                    inorganic: ['Imidacloprid 0.5ml/L spray', 'Oxydemeton methyl 1ml/L', 'Thiamethoxam 0.2g/L', 'Apply at early stage'],
+                    prevention: 'Use certified seeds, avoid water stress, monitor regularly'
+                },
+                {
+                    name: 'Potato Tuber Moth',
+                    symptoms: 'Tunnels in tubers, damaged flesh',
+                    organic: ['Deep planting', 'Earth up properly', 'Harvest early', 'Destroy crop residues', 'Trap cropping'],
+                    inorganic: ['Chlorpyrifos 2ml/L spray', 'Spinosad 0.2ml/L', 'Apply at canopy formation', 'Granular insecticides at planting'],
+                    prevention: 'Deep planting, proper earthing up, timely harvest, store in cool place'
+                }
+            ],
+            'onion': [
+                {
+                    name: 'Purple Blotch',
+                    symptoms: 'Purple lesions on leaves, leaf drying',
+                    organic: ['Remove infected leaves', 'Neem oil spray', 'Trichoderma viride', 'Improve air circulation', 'Avoid overhead irrigation'],
+                    inorganic: ['Mancozeb 2.5g/L spray', 'Difenoconazole 1ml/L', 'Apply at 15 day interval', 'Propiconazole 1ml/L'],
+                    prevention: 'Use healthy sets, crop rotation, proper spacing, avoid waterlogging'
+                },
+                {
+                    name: 'Thrips',
+                    symptoms: 'Silver patches on leaves, stunted growth',
+                    organic: ['Blue sticky traps', 'Neem oil 5ml/L spray', 'Remove weeds', 'Reflective mulching', 'Garlic extract spray'],
+                    inorganic: ['Fipronil 1ml/L spray', 'Spinosad 0.2ml/L', 'Imidacloprid 0.5ml/L', 'Oxydemeton methyl 1ml/L'],
+                    prevention: 'Use yellow/blue traps, crop rotation, remove crop residues'
+                },
+                {
+                    name: 'Onion Fly',
+                    symptoms: 'Wilting seedlings, maggots in bulbs',
+                    organic: ['Carbaryl dust around plants', 'Remove wilted plants', 'Neem cake application', 'Trap crops'],
+                    inorganic: ['Chlorpyrifos 2ml/L drench', 'Fipronil granules', 'Imidacloprid seed treatment', 'Apply at transplanting'],
+                    prevention: 'Use treated seeds, early planting, crop rotation, avoid manure'
+                },
+                {
+                    name: 'Stemphylium Blight',
+                    symptoms: 'Small brown spots, leaf tip drying',
+                    organic: ['Remove infected leaves', 'Neem oil spray', 'Improve drainage', 'Balanced fertilization'],
+                    inorganic: ['Mancozeb 2.5g/L spray', 'Propiconazole 1ml/L', 'Apply at first sign', 'Hexaconazole 1ml/L'],
+                    prevention: 'Use resistant varieties, proper spacing, avoid stress'
+                }
+            ]
+        };
+
+        let selectedCrop = 'all';
+
+        document.querySelectorAll('.crop-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.crop-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                selectedCrop = this.dataset.crop;
+                displayPests();
+            });
+        });
+
+        function displayPests() {
+            const container = document.getElementById('pestResults');
+            const crops = selectedCrop === 'all' ? Object.keys(pestData) : [selectedCrop];
+            
+            let html = '<div class="row">';
+            
+            crops.forEach(crop => {
+                if (pestData[crop]) {
+                    pestData[crop].forEach(pest => {
+                        const cropIcon = getCropIcon(crop);
+                        html += `
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 pest-card">
+                                    <div class="card-body">
+                                        <h5 class="text-success"><i class="fas fa-bug me-2"></i>${pest.name}</h5>
+                                        <p><strong>${cropIcon} Crop:</strong> ${crop.charAt(0).toUpperCase() + crop.slice(1)}</p>
+                                        <p><strong>Symptoms:</strong> ${pest.symptoms}</p>
+                                        <div class="treatment-section">
+                                            <div class="organic-section">
+                                                <h6 class="text-success"><i class="fas fa-leaf me-2"></i>Organic Method (जैविक तरीका)</h6>
+                                                <ul class="mb-2">
+                                                    ${pest.organic.map(item => `<li>${item}</li>`).join('')}
+                                                </ul>
+                                            </div>
+                                            <div class="inorganic-section">
+                                                <h6 class="text-warning"><i class="fas fa-flask me-2"></i>Inorganic Method (रासायनिक तरीका)</h6>
+                                                <ul class="mb-2">
+                                                    ${pest.inorganic.map(item => `<li>${item}</li>`).join('')}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="prevention-box">
+                                            <strong>Prevention (रोकथाम):</strong> ${pest.prevention}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function getCropIcon(crop) {
+            const icons = {
+                rice: '🌾', wheat: '🌾', cotton: '🌿', maize: '🌽',
+                groundnut: '🥜', sugarcane: '🎋', tomato: '🍅', potato: '🥔', onion: '🧅'
+            };
+            return icons[crop] || '🌱';
+        }
+
+        displayPests();
+    </script>
+    <style>
+        .crop-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .crop-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 100px;
+        }
+        .crop-btn:hover {
+            border-color: var(--primary);
+            background: #f0f8f0;
+        }
+        .crop-btn.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+        .crop-btn .crop-icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        .pest-card {
+            transition: all 0.3s;
+        }
+        .pest-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .treatment-section {
+            margin-top: 15px;
+        }
+        .organic-section, .inorganic-section {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .organic-section {
+            border-left: 4px solid #4CAF50;
+        }
+        .inorganic-section {
+            border-left: 4px solid #FF9800;
+        }
+        .organic-section h6, .inorganic-section h6 {
+            margin-bottom: 8px;
+        }
+        .prevention-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        .tips-list li {
+            padding: 5px 0;
+        }
+    </style>
+</body>
+</html>

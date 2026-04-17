@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fertilizer Guide - Farmer AI Advisory System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-leaf me-2"></i>Farmer AI</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/chatbot">AI Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pest_detection">Pest Detection</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container">
+            <h2><i class="fas fa-flask me-2"></i>Fertilizer Guide</h2>
+            <p>NPK Calculator and fertilizer recommendations for your crops</p>
+        </div>
+    </div>
+
+    <section class="main-content">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <form id="fertilizerForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Select Crop</label>
+                                    <select class="form-select" id="cropSelect" required>
+                                        <option value="">Choose a Crop</option>
+                                        <option value="rice">Rice (धान)</option>
+                                        <option value="wheat">Wheat (गेहूं)</option>
+                                        <option value="cotton">Cotton (कपास)</option>
+                                        <option value="maize">Maize (मक्का)</option>
+                                        <option value="groundnut">Groundnut (मूंगफली)</option>
+                                        <option value="sugarcane">Sugarcane (गन्ना)</option>
+                                        <option value="tomato">Tomato (टमाटर)</option>
+                                        <option value="potato">Potato (आलू)</option>
+                                    </select>
+                                </div>
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-calculator me-2"></i>Get Recommendations
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="fertilizerResults" class="mt-4" style="display: none;">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="text-success mb-4"><i class="fas fa-check-circle me-2"></i><span id="cropName"></span> Fertilizer Guide</h4>
+                                
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="info-box">
+                                            <h5><i class="fas fa-percentage me-2"></i>NPK Ratio</h5>
+                                            <p class="mb-0 h4" id="npkRatio"></p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-box">
+                                            <h5><i class="fas fa-calendar me-2"></i>Application Schedule</h5>
+                                            <p class="mb-0" id="schedule"></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h5 class="mt-4 mb-3"><i class="fas fa-pills me-2"></i>Fertilizer Requirements (per hectare)</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Fertilizer</th>
+                                                <th>Quantity</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="fertTable"></tbody>
+                                    </table>
+                                </div>
+
+                                <div class="best-fertilizers mt-4">
+                                    <h5><i class="fas fa-star me-2"></i>Best Fertilizers for <span id="cropName2"></span></h5>
+                                    <div class="row g-3 mt-2" id="bestFertilizers"></div>
+                                </div>
+
+                                <div class="alert alert-success mt-4">
+                                    <h5><i class="fas fa-lightbulb me-2"></i>Tips</h5>
+                                    <ul class="mb-0" id="tipsList"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h4 class="mb-4"><i class="fas fa-info-circle me-2"></i>Fertilizer Information</h4>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="fas fa-fire text-danger me-2"></i>N - Nitrogen</h5>
+                            <p>Promotes leaf growth, green color, and protein synthesis</p>
+                            <small>Sources: Urea, DAP, Ammonium Sulfate</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="fas fa-dna text-primary me-2"></i>P - Phosphorus</h5>
+                            <p>Root development, flowering, and seed formation</p>
+                            <small>Sources: DAP, SSP, Rock Phosphate</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="fas fa-lemon text-warning me-2"></i>K - Potassium</h5>
+                            <p>Water regulation, disease resistance, and quality</p>
+                            <small>Sources: MOP, SOP, Wood Ash</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p class="mb-0">&copy; 2024 Farmer AI Advisory System</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('fertilizerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const crop = document.getElementById('cropSelect').value;
+
+            try {
+                const response = await fetch('/api/fertilizer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ crop: crop })
+                });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    displayResults(data.fertilizer);
+                }
+            } catch (error) {
+                alert('Error getting recommendations. Please try again.');
+            }
+        });
+
+        function displayResults(fert) {
+            document.getElementById('fertilizerResults').style.display = 'block';
+            document.getElementById('cropName').textContent = fert.name;
+            document.getElementById('cropName2').textContent = fert.name;
+            document.getElementById('npkRatio').textContent = fert.npk;
+            document.getElementById('schedule').textContent = fert.schedule;
+
+            const tableBody = document.getElementById('fertTable');
+            tableBody.innerHTML = `
+                <tr><td><strong>Urea</strong></td><td>${fert.urea}</td></tr>
+                <tr><td><strong>DAP</strong></td><td>${fert.dap}</td></tr>
+                <tr><td><strong>MOP (Potash)</strong></td><td>${fert.mop}</td></tr>
+                <tr><td><strong>FYM (Farm Yard Manure)</strong></td><td>${fert.fym}</td></tr>
+            `;
+
+            const bestFertilizers = document.getElementById('bestFertilizers');
+            bestFertilizers.innerHTML = fert.best_fertilizers.map(f => `
+                <div class="col-md-6">
+                    <div class="best-fert-card">
+                        <h6><i class="${f.icon} me-2"></i>${f.name}</h6>
+                        <p class="mb-1">${f.description}</p>
+                        <small class="text-muted">${f.dose}</small>
+                    </div>
+                </div>
+            `).join('');
+
+            const tipsList = document.getElementById('tipsList');
+            tipsList.innerHTML = fert.tips.map(tip => `<li>${tip}</li>`).join('');
+        }
+    </script>
+</body>
+</html>

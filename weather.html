@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather - Farmer AI Advisory System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-leaf me-2"></i>Farmer AI</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/chatbot">AI Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pest_detection">Pest Detection</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container">
+            <h2><i class="fas fa-cloud-sun me-2"></i>Weather Forecast</h2>
+            <p>Real-time weather updates and farming advisories</p>
+        </div>
+    </div>
+
+    <section class="main-content">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="weather-card" id="currentWeather">
+                        <div class="row">
+                            <div class="col-md-6 weather-current">
+                                <i class="fas fa-sun fa-4x mb-3"></i>
+                                <div class="temp" id="temp">--°C</div>
+                                <div class="h4" id="condition">Loading...</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <div class="bg-white bg-opacity-25 rounded p-2 text-center">
+                                            <i class="fas fa-tint"></i>
+                                            <div class="h5 mb-0" id="humidity">--%</div>
+                                            <small>Humidity</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="bg-white bg-opacity-25 rounded p-2 text-center">
+                                            <i class="fas fa-wind"></i>
+                                            <div class="h5 mb-0" id="wind">-- km/h</div>
+                                            <small>Wind</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="bg-white bg-opacity-25 rounded p-2 text-center">
+                                            <i class="fas fa-cloud-rain"></i>
+                                            <div class="h5 mb-0" id="rainfall">-- mm</div>
+                                            <small>Rainfall</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="bg-white bg-opacity-25 rounded p-2 text-center">
+                                            <i class="fas fa-sun"></i>
+                                            <div class="h5 mb-0" id="uv">--</div>
+                                            <small>UV Index</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small id="location">Central India</small> | 
+                            <small id="lastUpdated">Last updated: --</small>
+                        </div>
+                    </div>
+
+                    <h4 class="mb-3"><i class="fas fa-calendar-week me-2"></i>7-Day Forecast</h4>
+                    <div class="weather-forecast" id="forecast">
+                        <div class="forecast-item">
+                            <div class="h6">Today</div>
+                            <i class="fas fa-sun fa-2x"></i>
+                            <div class="h5">--°</div>
+                            <small>--% rain</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="fas fa-lightbulb me-2"></i>Farming Advisory</h5>
+                            <div id="advisory" class="mt-3">
+                                <p class="text-muted">Loading advisory...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <h5><i class="fas fa-clock me-2"></i>Best Times</h5>
+                            <ul class="list-unstyled mt-3">
+                                <li class="mb-2"><i class="fas fa-sun text-warning me-2"></i>Irrigation: 5-9 AM</li>
+                                <li class="mb-2"><i class="fas fa-spray-can text-success me-2"></i>Spraying: 6-10 AM</li>
+                                <li class="mb-2"><i class="fas fa-seedling text-primary me-2"></i>Sowing: Early morning</li>
+                                <li><i class="fas fa-truck text-info me-2"></i>Harvest: Morning hours</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="info-box">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i>Weather Alerts for Farmers</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p><strong>Rain Alert:</strong> Don't spray pesticides if rain expected within 6 hours</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Frost Alert:</strong> Cover sensitive crops when temperature drops below 5°C</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>High Humidity:</strong> Monitor for fungal diseases, apply preventive sprays</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p class="mb-0">&copy; 2024 Farmer AI Advisory System</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function loadWeather() {
+            try {
+                const response = await fetch('/api/weather');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateWeatherUI(data);
+                }
+            } catch (error) {
+                console.error('Error loading weather:', error);
+            }
+        }
+
+        function updateWeatherUI(data) {
+            document.getElementById('temp').textContent = data.current.temp + '°C';
+            document.getElementById('condition').textContent = data.current.condition;
+            document.getElementById('humidity').textContent = data.current.humidity + '%';
+            document.getElementById('wind').textContent = data.current.wind + ' km/h';
+            document.getElementById('rainfall').textContent = data.current.rainfall + ' mm';
+            document.getElementById('uv').textContent = data.current.uv;
+            document.getElementById('location').textContent = data.location;
+            document.getElementById('lastUpdated').textContent = 'Updated: ' + data.last_updated;
+            document.getElementById('advisory').innerHTML = `<p>${data.advisory}</p>`;
+
+            const forecastContainer = document.getElementById('forecast');
+            forecastContainer.innerHTML = '';
+            
+            data.forecast.forEach(day => {
+                const icon = day.condition.includes('Rain') ? 'fa-cloud-rain' : 
+                            day.condition.includes('Cloud') ? 'fa-cloud' : 'fa-sun';
+                forecastContainer.innerHTML += `
+                    <div class="forecast-item">
+                        <div class="h6">${day.day}</div>
+                        <i class="fas ${icon} fa-2x"></i>
+                        <div class="h5">${day.high}°</div>
+                        <small>${day.rain}% rain</small>
+                    </div>
+                `;
+            });
+        }
+
+        loadWeather();
+        setInterval(loadWeather, 300000);
+    </script>
+</body>
+</html>

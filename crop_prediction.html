@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Prediction - Farmer AI Advisory System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-leaf me-2"></i>Farmer AI</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/chatbot">AI Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pest_detection">Pest Detection</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container">
+            <h2><i class="fas fa-seedling me-2"></i>Crop Prediction</h2>
+            <p>Get AI-powered crop recommendations based on your soil and season</p>
+        </div>
+    </div>
+
+    <section class="main-content">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <form id="cropForm">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label"><i class="fas fa-layer-group me-2"></i>Soil Type</label>
+                                        <select class="form-select" id="soilType" required>
+                                            <option value="">Select Soil Type</option>
+                                            <option value="black">Black Soil</option>
+                                            <option value="red">Red Soil</option>
+                                            <option value="alluvial">Alluvial Soil</option>
+                                            <option value="sandy">Sandy Soil</option>
+                                            <option value="clay">Clay Soil</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label"><i class="fas fa-calendar-alt me-2"></i>Season</label>
+                                        <select class="form-select" id="season" required>
+                                            <option value="">Select Season</option>
+                                            <option value="kharif">Kharif (June-Oct)</option>
+                                            <option value="rabi">Rabi (Oct-Mar)</option>
+                                            <option value="zaid">Zaid (Mar-Jun)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-4 text-center">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-search me-2"></i>Get Recommendations
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="results" class="mt-4" style="display: none;">
+                        <h4 class="mb-3"><i class="fas fa-list me-2"></i>Recommended Crops</h4>
+                        <div id="cropResults"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p class="mb-0">&copy; 2024 Farmer AI Advisory System</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const cropEmojis = {
+            'Rice': '🌾',
+            'Wheat': '🌾',
+            'Cotton': '🌱',
+            'Maize': '🌽',
+            'Groundnut': '🥜',
+            'Sugarcane': '🎋',
+            'Soybean': '🫘',
+            'Tomato': '🍅',
+            'Potato': '🥔',
+            'Onion': '🧅',
+            'Chickpea': '🫘',
+            'Moong Bean': '🟢',
+            'Watermelon': '🍉',
+            'Green Gram': '🟢',
+            'Bajra': '🌾',
+            'Barley': '🌾',
+            'Sesame': '⚫',
+            'Peas': '🟢',
+            'Mustard': '🌻',
+            'Ragi': '🌾'
+        };
+
+        document.getElementById('cropForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const soil = document.getElementById('soilType').value;
+            const season = document.getElementById('season').value;
+
+            try {
+                const response = await fetch('/api/crop', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ soil_type: soil, season: season })
+                });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    displayResults(data.crops);
+                }
+            } catch (error) {
+                alert('Error getting recommendations. Please try again.');
+            }
+        });
+
+        function displayResults(crops) {
+            const resultsDiv = document.getElementById('results');
+            const cropResults = document.getElementById('cropResults');
+            resultsDiv.style.display = 'block';
+            cropResults.innerHTML = '';
+
+            crops.forEach((crop, index) => {
+                const emoji = cropEmojis[crop.crop] || '🌾';
+                const confidenceClass = crop.confidence >= 90 ? 'success' : crop.confidence >= 80 ? 'warning' : 'secondary';
+                const div = document.createElement('div');
+                div.className = 'card mb-3';
+                div.innerHTML = `
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span style="font-size: 2.5rem; margin-right: 20px;">${emoji}</span>
+                                <h4 class="d-inline align-middle">${crop.crop}</h4>
+                            </div>
+                            <div>
+                                <span class="badge bg-${confidenceClass} fs-6 me-2">${crop.confidence}% Match</span>
+                                <a href="/fertilizer" class="btn btn-sm btn-success">
+                                    <i class="fas fa-flask me-1"></i>Fertilizer
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                cropResults.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
